@@ -44,19 +44,19 @@ def create_app(config_object=None, worker_id=1, private_key=None):
     aggregator_ip = app.config.get("AGGREGATOR_IP")
     server_ip = app.config.get("SERVER_IP")
 
-    # Setup PySeal
-    logging.info("Setting up Library for Worker {}!".format(worker_id))
+    # Setup HE library
+    logging.info("Setting up HE library for Worker {}!".format(worker_id))
     cipher_save_path = os.path.join("output", CIPHERTEXT_SAVE_FILE)
     if private_key is None:
         json_key = requests.get(server_ip + SERVER_GET_KEY_ENDPOINT).json()
         private_key = json_key['result']['key']
-    logging.warning(f"Private key of {private_key} is used!")
+    # logging.debug(f"Private key of {private_key} is used!")
     he_lib = HomomorphicEncryptionEW(
         private_key=private_key,
         cipher_save_path=cipher_save_path
     )
 
-    logging.info("Library for Worker {} set up successfully!".format(worker_id))
+    logging.info("HE library for Worker {} set up successfully!".format(worker_id))
 
     # Setup Model
     model_save_path = os.path.join(app.instance_path + MODEL_SAVE_FILE)

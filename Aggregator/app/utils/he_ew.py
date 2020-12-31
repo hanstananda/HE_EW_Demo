@@ -10,30 +10,26 @@ from config.flask_config import APP_ROOT, LIBRARY_EXECUTABLE
 
 
 class HomomorphicEncryptionEW:
+    min_range = -10.0
     max_range = 10.0
-    supported_max_int = 32000
+    supported_max_int = 32767
 
     def __init__(self, private_key, cipher_save_path):
         self._private_key = private_key
         self._cipher_save_path = cipher_save_path
 
-    @classmethod
-    def get_param_info(cls):
+    @staticmethod
+    def get_param_info():
         res = {
-            "scheme": "HomomorphicEncryptionEW",
-            "supported_max_int": cls.supported_max_int,
-            "max_range": cls.max_range,
+            "key": "HomomorphicEncryptionEW"
         }
         return res
 
     def normalize_value(self, val):
-        processed_val = max(val, -self.max_range)
+        processed_val = max(val, self.min_range)
         processed_val = min(processed_val, self.max_range)
-        # Normalize from (-max_range, max_range) to (0, 2*max_range)
-        processed_val += self.max_range
-
-        processed_val *= self.supported_max_int
-        processed_val /= 2 * self.max_range
+        processed_val *= 32767
+        processed_val /= (self.max_range - self.min_range)
         return int(processed_val)
 
     def encrypt_layer_weights(self, layer_weights):
@@ -46,11 +42,12 @@ class HomomorphicEncryptionEW:
             # Reshape to 1D vector
             vector_size = layer_weight.size
             reshaped_layer_weight = numpy.resize(layer_weight, (vector_size,))
-            logging.debug(f"layer weight {idx} = {numpy.amin(reshaped_layer_weight)} " +
-                          f"{numpy.amax(reshaped_layer_weight)} {reshaped_layer_weight.shape}")
+            logging.debug(reshaped_layer_weight.shape)
             # Cast to python native list then pass to SEAL library to be encrypted
             weights.append(reshaped_layer_weight)
 
+        time_elapsed = time.clock() - start_time
+        logging.info(f"Time taken for encryption is {time_elapsed} s")
         # Format input to be given to the library
         inp_str = f"1 {self._private_key}\n"
         inp_str += f"{len(weights)}\n"
@@ -68,8 +65,4 @@ class HomomorphicEncryptionEW:
         process_outputs = process.stdout.decode('utf-8')
         # Remove the key from the output
         key_end_idx = process_outputs.find("\n")
-
-        time_elapsed = time.clock() - start_time
-        logging.info(f"Time taken for encryption and encoding is {time_elapsed} s")
-
         return process_outputs[key_end_idx:]
