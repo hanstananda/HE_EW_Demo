@@ -4,7 +4,7 @@ import os
 
 import requests
 
-from app.utils.python_seal import PySeal
+from app.utils.he_ew import HomomorphicEncryptionEW
 
 from flask import Flask, jsonify, send_file, request
 
@@ -35,18 +35,15 @@ def create_app(config_object=None):
     except OSError:
         pass
 
-    logging.info("Setting up PySeal for Aggregator!")
+    logging.info("Setting up HE library for Aggregator!")
 
     server_ip = app.config.get("SERVER_IP")
 
     # Setup PySeal
-    server_params_text = requests.get(server_ip + PARAMS_JSON_ENDPOINT).text
-    server_params_json = json.loads(server_params_text)
-    server_params = server_params_json["result"]
     cipher_save_path = os.path.join(app.instance_path + CIPHERTEXT_SAVE_FILE)
-    seal = PySeal(server_params, cipher_save_path)
+    he_lib = HomomorphicEncryptionEW(cipher_save_path)
 
-    logging.info("PySeal for Aggregator set up successfully!")
+    logging.info("HE library for Aggregator set up successfully!")
 
     # a simple page that says hello
     @app.route('/')
@@ -56,7 +53,7 @@ def create_app(config_object=None):
     # To check whether worker params successfully set up
     @app.route('/get_params')
     def get_params():
-        res = seal.get_param_info()
+        res = he_lib.get_param_info()
         return jsonify({
             'success': True,
             'error_code': SERVER_OK,
@@ -68,7 +65,7 @@ def create_app(config_object=None):
     def save_weights():
         content = request.json
         weights = content['weights']
-        seal.save_encrypted_weight(weights)
+        he_lib.save_encrypted_weight(weights)
         return jsonify({
             'success': True,
             'error_code': SERVER_OK,
@@ -77,7 +74,7 @@ def create_app(config_object=None):
 
     @app.route('/agg_val')
     def agg_val():
-        weight, num_party = seal.aggregate_encrypted_weights()
+        weight, num_party = he_lib.aggregate_encrypted_weights()
         if not weight:
             return jsonify({
                 'success': True,

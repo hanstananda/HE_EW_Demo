@@ -9,6 +9,7 @@ PARAMS_JSON_ENDPOINT = "/get_params"
 PARAMS_SAVE_FILE = "params.txt"
 CIPHERTEXT_SAVE_FILE = "cipher.txt"
 UPDATE_MODEL_ENDPOINT = "/update_model_weights_enc"
+LIBRARY_EXECUTABLE = "library/app_HE"
 
 
 class DefaultConfig:
