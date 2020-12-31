@@ -1,0 +1,3 @@
+[submodule "library/HE_lib"]
+	path = library/HE_lib
+	url = git@github.com:hanstananda/HE_EW_CPP.git

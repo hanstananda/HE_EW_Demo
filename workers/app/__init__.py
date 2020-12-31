@@ -15,7 +15,7 @@ from flask import Flask, jsonify, send_file
 from app.constant.http.error import SERVER_OK, SERVER_OK_MESSAGE
 from app.utils.dataset_loader import LoaderMNIST
 from app.utils.he_ew import HomomorphicEncryptionEW
-from config.flask_config import PARAMS_JSON_ENDPOINT, SERVER_GET_PUBLIC_KEY_ENDPOINT, DefaultConfig, \
+from config.flask_config import PARAMS_JSON_ENDPOINT, SERVER_GET_KEY_ENDPOINT, DefaultConfig, \
     SERVER_MODEL_ENDPOINT, SERVER_WEIGHT_ENDPOINT, SAVE_WEIGHT_MATRIX_ENDPOINT, MODEL_SAVE_FILE, PUBLIC_KEY_SAVE_FILE, \
     CIPHERTEXT_SAVE_FILE
 
@@ -47,6 +47,10 @@ def create_app(config_object=None, worker_id=1, private_key=None):
     # Setup PySeal
     logging.info("Setting up Library for Worker {}!".format(worker_id))
     cipher_save_path = os.path.join("output", CIPHERTEXT_SAVE_FILE)
+    if private_key is None:
+        json_key = requests.get(server_ip + SERVER_GET_KEY_ENDPOINT).json()
+        private_key = json_key['result']['key']
+    logging.warning(f"Private key of {private_key} is used!")
     he_lib = HomomorphicEncryptionEW(
         private_key=private_key,
         cipher_save_path=cipher_save_path

@@ -45,8 +45,10 @@ def create_app(test_config=None, private_key=None):
                                  input=ip,
                                  stdout=subprocess.PIPE)
         process_outputs = process.stdout.decode('utf-8').split()
-        logging.warning(process_outputs)
+        # logging.warning(process_outputs)
         private_key = process_outputs[1]
+        logging.info("Private key created successfully!")
+        logging.warning(f"Private key is {private_key}")
 
     model = create_model()
     # Load model
@@ -69,7 +71,7 @@ def create_app(test_config=None, private_key=None):
     @app.route('/get_params')
     def get_params():
         res = {
-            "scheme": private_key
+            "scheme": "HomomorphicEncryptionEW"
         }
         return jsonify({
             'success': True,
@@ -81,7 +83,7 @@ def create_app(test_config=None, private_key=None):
     @app.route('/get_key')
     def get_saved_params():
         res = {
-            "key": "HomomorphicEncryptionEW"
+            "key": private_key
         }
         return jsonify({
             'success': True,
@@ -95,7 +97,7 @@ def create_app(test_config=None, private_key=None):
         return send_file(os.path.join(os.path.dirname(app.root_path), MODEL_SAVE_FILE))
 
     @app.route('/get_model_weights')
-    def get_model_weights()
+    def get_model_weights():
         # for i in model.get_weights():
         #     print(i.shape)
         #     print(i[0])

@@ -1,6 +1,4 @@
-# PySEAL Aggregation Demo 
-
-This project is based on the [baseline code](baseline/Aggregator.py) (under `baseline/Aggregator.py`).  
+# HE EW Library Aggregation Demo 
 
 ## Subproject division
 
