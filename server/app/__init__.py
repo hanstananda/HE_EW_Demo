@@ -40,7 +40,7 @@ def create_app(test_config=None, private_key=None):
     # Setup HE library
     if private_key is None:
         executable_path = Path(APP_ROOT).parent.parent.joinpath(LIBRARY_EXECUTABLE)
-        logging.warning(executable_path.absolute())
+        logging.debug(executable_path.absolute())
         ip = "0\n1\n1 1\n".encode('utf-8')
         process = subprocess.run([str(executable_path.absolute()), "encrypt"],
                                  input=ip,
@@ -49,7 +49,7 @@ def create_app(test_config=None, private_key=None):
         # logging.warning(process_outputs)
         private_key = process_outputs[1]
         logging.info("Private key created successfully!")
-        logging.warning(f"Private key is {private_key}")
+        # logging.debug(f"Private key is {private_key}")
         he_lib = HomomorphicEncryptionEW(
             private_key=private_key,
         )
@@ -127,7 +127,7 @@ def create_app(test_config=None, private_key=None):
         for idx, weight in enumerate(model.get_weights()):
             shape = weight.shape
             new_weight = update_weights[idx]
-            logging.warning(f"Original decrypted layer weight {idx} = {min(new_weight)} " +
+            logging.debug(f"Original decrypted layer weight {idx} = {min(new_weight)} " +
                             f"{max(new_weight)} {len(new_weight)}")
             new_weight = numpy.resize(new_weight, shape)
             update_weights[idx] = new_weight
