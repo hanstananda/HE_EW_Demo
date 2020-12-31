@@ -10,35 +10,49 @@ from config.flask_config import APP_ROOT, LIBRARY_EXECUTABLE
 
 
 class HomomorphicEncryptionEW:
-    min_range = -10.0
     max_range = 10.0
-    supported_max_int = 32767
+    supported_max_int = 32000
 
-    def __init__(self, cipher_save_path):
-        self._cipher_save_path = cipher_save_path
-        self._encrypted_weights = []
+    def __init__(self, private_key):
+        self._private_key = private_key
 
-    @staticmethod
-    def get_param_info():
+    @classmethod
+    def get_param_info(cls):
         res = {
-            "scheme": "HomomorphicEncryptionEW"
+            "scheme": "HomomorphicEncryptionEW",
+            "supported_max_int": cls.supported_max_int,
+            "max_range": cls.max_range,
         }
         return res
 
-    def save_encrypted_weight(self, weights):
-        self._encrypted_weights.append(weights)
+    def decode_value(self, val, num_party):
+        processed_val = val * 2 * self.max_range
+        processed_val /= self.supported_max_int
 
-    def aggregate_encrypted_weights(self):
-        inp_str = "0\n"
-        num_party = len(self._encrypted_weights)
-        for i in self._encrypted_weights:
-            inp_str += i + "\n"
+        # Normalize back from (0, 2*max_range) to (-max_range, max_range)
+        processed_val -= self.max_range * num_party
+
+        return processed_val / num_party
+
+    def decrypt_layer_weights(self, layer_weights, num_party):
+        decoded_weights = []
+        start_time = time.clock()
+        inp_str = f"1 {self._private_key}\n"
+        inp_str += layer_weights
         executable_path = Path(APP_ROOT).parent.parent.joinpath(LIBRARY_EXECUTABLE)
-        process = subprocess.run([str(executable_path.absolute()), "addition", str(num_party)],
+        process = subprocess.run([str(executable_path.absolute()), "decrypt"],
                                  input=inp_str.encode('utf-8'),
                                  stdout=subprocess.PIPE)
-        process_outputs = process.stdout.decode('utf-8')
-        # Remove the key params from the output
-        key_end_idx = process_outputs.find("\n")
-        return process_outputs[key_end_idx:], num_party
+        process_outputs = process.stdout.decode('utf-8').split("\n")
 
+        for idx in range(2, len(process_outputs)):
+            encoded_weights = process_outputs[idx].split()[1:]
+            decoded = [self.decode_value(int(i), num_party=num_party) for i in encoded_weights]
+            if decoded:  # Check nonempty
+                decoded_weights.append(decoded)
+                # logging.warning(decoded[:10])
+
+        time_elapsed = time.clock() - start_time
+        logging.info(f"Time taken for decryption and decoding is {time_elapsed} s")
+
+        return decoded_weights

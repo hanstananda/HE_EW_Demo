@@ -8,6 +8,7 @@ import numpy
 from flask import Flask, jsonify, send_file, request
 
 from app.constant.http.error import SERVER_OK, SERVER_OK_MESSAGE
+from app.utils.he_ew import HomomorphicEncryptionEW
 
 from config.flask_config import PARAMS_SAVE_FILE, MODEL_SAVE_FILE, CIPHERTEXT_SAVE_FILE, LIBRARY_EXECUTABLE, basedir, \
     APP_ROOT
@@ -49,6 +50,9 @@ def create_app(test_config=None, private_key=None):
         private_key = process_outputs[1]
         logging.info("Private key created successfully!")
         logging.warning(f"Private key is {private_key}")
+        he_lib = HomomorphicEncryptionEW(
+            private_key=private_key,
+        )
 
     model = create_model()
     # Load model
@@ -70,9 +74,7 @@ def create_app(test_config=None, private_key=None):
 
     @app.route('/get_params')
     def get_params():
-        res = {
-            "scheme": "HomomorphicEncryptionEW"
-        }
+        res = he_lib.get_param_info()
         return jsonify({
             'success': True,
             'error_code': SERVER_OK,
@@ -120,15 +122,15 @@ def create_app(test_config=None, private_key=None):
         weights = content['weights']
         num_party = content['num_party']
         logging.info("Num workers involved = {}".format(num_party))
-        # update_weights = seal.decode_and_decrypt_weight_layers(weights, num_party)
-        update_weights = []
+        update_weights = he_lib.decrypt_layer_weights(weights, num_party)
 
         for idx, weight in enumerate(model.get_weights()):
             shape = weight.shape
             new_weight = update_weights[idx]
+            logging.warning(f"Original decrypted layer weight {idx} = {min(new_weight)} " +
+                            f"{max(new_weight)} {len(new_weight)}")
             new_weight = numpy.resize(new_weight, shape)
             update_weights[idx] = new_weight
-            logging.debug("layer weight {} = {}".format(idx, update_weights[idx]))
 
         model.set_weights(update_weights)
         evaluate_model()
