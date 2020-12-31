@@ -216,4 +216,4 @@ We then started to test with 2 workers having 30000 datasets each, totalling 600
 *   After some trials, it is known that the maximum integer supported is around 32768. 
     Therefore, we need to map our floating values to integer within this range. 
 
- 
+*   It is noted that sometimes the decryption occasionally returns a random number(possibly failure of decryption?) which causes accuracy drops. 
