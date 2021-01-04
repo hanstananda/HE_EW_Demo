@@ -12,6 +12,7 @@ from config.flask_config import APP_ROOT, LIBRARY_EXECUTABLE
 class HomomorphicEncryptionEW:
     max_range = 10.0
     supported_max_int = 32000
+    EPS = 1e-3
 
     def __init__(self, private_key):
         self._private_key = private_key
@@ -37,7 +38,7 @@ class HomomorphicEncryptionEW:
         # Normalize back from (0, 2*max_range) to (-max_range, max_range)
         result -= self.max_range
 
-        if result >= self.max_range or result <= -self.max_range:
+        if result - self.EPS > self.max_range or result + self.EPS < -self.max_range:
             logging.warning(f"Found decoded value of {result} from {val} more than supported limit! Resetting to 0...")
             result = 0.0
 
