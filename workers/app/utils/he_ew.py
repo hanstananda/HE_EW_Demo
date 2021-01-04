@@ -13,9 +13,8 @@ class HomomorphicEncryptionEW:
     max_range = 10.0
     supported_max_int = 32000
 
-    def __init__(self, private_key, cipher_save_path):
+    def __init__(self, private_key):
         self._private_key = private_key
-        self._cipher_save_path = cipher_save_path
 
     @classmethod
     def get_param_info(cls):
@@ -46,7 +45,7 @@ class HomomorphicEncryptionEW:
             # Reshape to 1D vector
             vector_size = layer_weight.size
             reshaped_layer_weight = numpy.resize(layer_weight, (vector_size,))
-            logging.debug(f"layer weight {idx} = {numpy.amin(reshaped_layer_weight)} " +
+            logging.debug(f"Encrypting layer weight {idx} = {numpy.amin(reshaped_layer_weight)} " +
                           f"{numpy.amax(reshaped_layer_weight)} {reshaped_layer_weight.shape}")
             # Cast to python native list then pass to SEAL library to be encrypted
             weights.append(reshaped_layer_weight)
