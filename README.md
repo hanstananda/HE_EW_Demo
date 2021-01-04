@@ -155,7 +155,7 @@ We then started to test with 2 workers having 30000 datasets each, totalling 600
     Test accuracy: 0.9853000044822693
     ```
 
-1.  The encryption performed on the layer weights after training took 1s () 
+1.  The encryption performed on the layer weights after training took 0.8205s (0.0251s) 
 
     Samples (in seconds): 
     ```
@@ -181,7 +181,7 @@ We then started to test with 2 workers having 30000 datasets each, totalling 600
     0.7819030000000566
     ```
 
-2.  The aggregation performed on the layer weights from 2 workers took 2s ()
+2.  The aggregation performed on the layer weights from 2 workers took 2.1839s (0.0651s)
 
     Samples (in seconds): 
     ```
@@ -196,7 +196,7 @@ We then started to test with 2 workers having 30000 datasets each, totalling 600
     2.1970270000000056
     2.1701869999999985
     ```
-3.  The decryption performed on the layer weights took 1s ()
+3.  The decryption performed on the layer weights took 0.7381s (0.0258s)
 
     Samples (in seconds): 
     ```
@@ -216,4 +216,4 @@ We then started to test with 2 workers having 30000 datasets each, totalling 600
 *   After some trials, it is known that the maximum integer supported is around 32768. 
     Therefore, we need to map our floating values to integer within this range. 
 
-*   It is noted that sometimes the decryption occasionally returns a random number(possibly failure of decryption?) which causes accuracy drops. 
+*   ^: It is noted that sometimes the decryption occasionally returns a random number(possibly failure of decryption?) which causes accuracy drops. 
