@@ -10,9 +10,8 @@ from config.flask_config import APP_ROOT, LIBRARY_EXECUTABLE
 
 
 class HomomorphicEncryptionEW:
-    min_range = -10.0
     max_range = 10.0
-    supported_max_int = 32767
+    supported_max_int = 32000
 
     def __init__(self, cipher_save_path):
         self._cipher_save_path = cipher_save_path
