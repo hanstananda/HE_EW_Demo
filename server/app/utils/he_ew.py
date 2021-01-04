@@ -25,14 +25,23 @@ class HomomorphicEncryptionEW:
         }
         return res
 
-    def decode_value(self, val, num_party):
+    def decode_value(self, val: int, num_party: int):
+        # if val >= 2 * self.supported_max_int:
+        #     logging.warning(f"Found decrypted value of {val} more than supported limit!")
         processed_val = val * 2 * self.max_range
         processed_val /= self.supported_max_int
 
-        # Normalize back from (0, 2*max_range) to (-max_range, max_range)
-        processed_val -= self.max_range * num_party
+        # Divide by the number of involved parties
+        result = processed_val / num_party
 
-        return processed_val / num_party
+        # Normalize back from (0, 2*max_range) to (-max_range, max_range)
+        result -= self.max_range
+
+        if result >= self.max_range or result <= -self.max_range:
+            logging.warning(f"Found decoded value of {result} from {val} more than supported limit! Resetting to 0...")
+            result = 0.0
+
+        return result
 
     def decrypt_layer_weights(self, layer_weights, num_party):
         decoded_weights = []
