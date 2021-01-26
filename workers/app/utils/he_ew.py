@@ -1,3 +1,4 @@
+import base64
 import logging
 import os
 import subprocess
@@ -61,18 +62,22 @@ class HomomorphicEncryptionEW:
                 inp_str += f"{processed_val} "
             inp_str += "\n"
 
-        f = open(self._cipher_save_path, "w+")
-        executable_path = Path(APP_ROOT).parent.parent.joinpath(LIBRARY_EXECUTABLE)
-        process = subprocess.run([str(executable_path.absolute()), "encrypt"],
+        executable_path = Path(APP_ROOT).parent.joinpath(LIBRARY_EXECUTABLE)
+        process = subprocess.run([str(executable_path.absolute()), "encrypt", Path(self._cipher_save_path).absolute()],
                                  input=inp_str.encode('utf-8'),
-                                 stdout=f)
+                                 stdout=subprocess.PIPE)
 
-        # process_outputs = process.stdout.decode('utf-8')
-        # # Remove the key from the output
-        # key_end_idx = process_outputs.find("\n")
-        #
-        # time_elapsed = time.clock() - start_time
-        # logging.info(f"Time taken for encryption and encoding is {time_elapsed} s")
-        #
-        # return process_outputs[key_end_idx:]
-        return ""
+        process_outputs = process.stdout.decode('utf-8')
+        # Remove the key from the output
+        key_end_idx = process_outputs.find("\n")
+
+        with open(self._cipher_save_path, "rb") as f:
+            encoded_string = base64.b64encode(f.read())
+
+        time_elapsed = time.clock() - start_time
+        logging.info(f"Time taken for encryption and encoding is {time_elapsed} s")
+
+        return {
+            "metadata": process_outputs[key_end_idx:],
+            "weights": encoded_string
+        }

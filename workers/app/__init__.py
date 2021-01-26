@@ -104,9 +104,7 @@ def create_app(config_object=None, worker_id=1, private_key=None):
         reload_weight()
         x_train, y_train = dataset.get_train_data_partitions(worker_id)
         model_nn.train(x_train, y_train)
-        request = {
-            "weights": he_lib.encrypt_layer_weights(model_nn.get_weights())
-        }
+        request = he_lib.encrypt_layer_weights(model_nn.get_weights())
         # for i in request["weights"]:
         #     logging.info("Data type is {}".format(type(i)))
         requests.post(aggregator_ip + SAVE_WEIGHT_MATRIX_ENDPOINT, json=request)
