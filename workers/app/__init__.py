@@ -45,6 +45,7 @@ def create_app(config_object=None, worker_id=1, private_key=None):
     server_ip = app.config.get("SERVER_IP")
 
     # Setup HE library
+    cipher_save_path = os.path.join(app.instance_path, CIPHERTEXT_SAVE_FILE)
     logging.info("Setting up HE library for Worker {}!".format(worker_id))
     if private_key is None:
         json_key = requests.get(server_ip + SERVER_GET_KEY_ENDPOINT).json()
@@ -52,11 +53,16 @@ def create_app(config_object=None, worker_id=1, private_key=None):
     # logging.debug(f"Private key of {private_key} is used!")
     he_lib = HomomorphicEncryptionEW(
         private_key=private_key,
+        cipher_save_path=cipher_save_path
     )
 
     logging.info("HE library for Worker {} set up successfully!".format(worker_id))
 
     # Setup Model
+    gpus = tf.config.experimental.list_physical_devices('GPU')
+    for gpu in gpus:
+        tf.config.experimental.set_memory_growth(gpu, True)
+
     model_save_path = os.path.join(app.instance_path + MODEL_SAVE_FILE)
     h5_file = requests.get(server_ip + SERVER_MODEL_ENDPOINT).content
     model_nn = ModelNN(h5_file, model_save_path)

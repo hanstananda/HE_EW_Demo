@@ -13,8 +13,9 @@ class HomomorphicEncryptionEW:
     max_range = 10.0
     supported_max_int = 60000
 
-    def __init__(self, private_key):
+    def __init__(self, private_key, cipher_save_path):
         self._private_key = private_key
+        self._cipher_save_path = cipher_save_path
 
     @classmethod
     def get_param_info(cls):
@@ -60,15 +61,18 @@ class HomomorphicEncryptionEW:
                 inp_str += f"{processed_val} "
             inp_str += "\n"
 
+        f = open(self._cipher_save_path, "w+")
         executable_path = Path(APP_ROOT).parent.parent.joinpath(LIBRARY_EXECUTABLE)
         process = subprocess.run([str(executable_path.absolute()), "encrypt"],
                                  input=inp_str.encode('utf-8'),
-                                 stdout=subprocess.PIPE)
-        process_outputs = process.stdout.decode('utf-8')
-        # Remove the key from the output
-        key_end_idx = process_outputs.find("\n")
+                                 stdout=f)
 
-        time_elapsed = time.clock() - start_time
-        logging.info(f"Time taken for encryption and encoding is {time_elapsed} s")
-
-        return process_outputs[key_end_idx:]
+        # process_outputs = process.stdout.decode('utf-8')
+        # # Remove the key from the output
+        # key_end_idx = process_outputs.find("\n")
+        #
+        # time_elapsed = time.clock() - start_time
+        # logging.info(f"Time taken for encryption and encoding is {time_elapsed} s")
+        #
+        # return process_outputs[key_end_idx:]
+        return ""
