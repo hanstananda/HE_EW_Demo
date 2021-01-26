@@ -54,15 +54,22 @@ def create_app(test_config=None, private_key=None):
             private_key=private_key,
         )
 
+    # Setup model
+    import tensorflow as tf
+    gpus = tf.config.experimental.list_physical_devices('GPU')
+    for gpu in gpus:
+        tf.config.experimental.set_memory_growth(gpu, True)
+
     model = create_model()
+
     # Load model
-    if os.path.exists(MODEL_SAVE_FILE):
-        try:
-            model = keras.models.load_model(MODEL_SAVE_FILE)
-        except:
-            logging.warning("Error loading previous model! creating a new one...")
-    else:
-        logging.info("Previous model not found! creating a new one...")
+    # if os.path.exists(MODEL_SAVE_FILE):
+    #     try:
+    #         model = keras.models.load_model(MODEL_SAVE_FILE)
+    #     except:
+    #         logging.warning("Error loading previous model! creating a new one...")
+    # else:
+    #     logging.info("Previous model not found! creating a new one...")
 
     model.save(MODEL_SAVE_FILE)
     logging.info("Demo model saved!")
