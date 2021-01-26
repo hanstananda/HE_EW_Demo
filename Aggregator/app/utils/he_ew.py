@@ -1,12 +1,14 @@
+import base64
 import logging
 import os
 import subprocess
 import time
+from datetime import datetime
 from pathlib import Path
 
 import numpy
 
-from config.flask_config import APP_ROOT, LIBRARY_EXECUTABLE
+from config.flask_config import APP_ROOT, LIBRARY_EXECUTABLE, CIPHERTEXT_SAVE_FILE
 
 
 class HomomorphicEncryptionEW:
@@ -16,6 +18,7 @@ class HomomorphicEncryptionEW:
     def __init__(self, cipher_save_path):
         self._cipher_save_path = cipher_save_path
         self._encrypted_weights = []
+        self.metadata = ""
 
     @staticmethod
     def get_param_info():
@@ -25,16 +28,25 @@ class HomomorphicEncryptionEW:
         return res
 
     def save_encrypted_weight(self, weights):
-        self._encrypted_weights.append(weights)
+        file_path = Path(self._cipher_save_path).joinpath(str(datetime.now()) + ".bin")
+        with open(file_path, "wb+") as f:
+            f.write(base64.b64decode(weights))
+        self._encrypted_weights.append(file_path.absolute())
 
     def aggregate_encrypted_weights(self):
         start_time = time.clock()
         inp_str = "0\n"
+        inp_str += self.metadata
         num_party = len(self._encrypted_weights)
-        for i in self._encrypted_weights:
-            inp_str += i + "\n"
-        executable_path = Path(APP_ROOT).parent.parent.joinpath(LIBRARY_EXECUTABLE)
-        process = subprocess.run([str(executable_path.absolute()), "addition", str(num_party)],
+        if num_party == 0:
+            return {
+                "metadata": self.metadata,
+                "weights": None,
+                "num_party": num_party
+            }
+        executable_path = Path(APP_ROOT).parent.joinpath(LIBRARY_EXECUTABLE)
+        result_file = Path(self._cipher_save_path).joinpath(CIPHERTEXT_SAVE_FILE)
+        process = subprocess.run([str(executable_path.absolute()), "add", result_file.absolute(), str(num_party), *self._encrypted_weights],
                                  input=inp_str.encode('utf-8'),
                                  stdout=subprocess.PIPE)
         process_outputs = process.stdout.decode('utf-8')
@@ -47,5 +59,13 @@ class HomomorphicEncryptionEW:
         # Reset encrypted weights
         self._encrypted_weights = []
 
-        return process_outputs[key_end_idx:], num_party
+        with open(result_file, "rb") as f:
+            encoded_string = base64.b64encode(f.read())
+
+        return {
+            "metadata": process_outputs[key_end_idx:],
+            "weights": encoded_string,
+            "num_party": num_party
+        }
+
 

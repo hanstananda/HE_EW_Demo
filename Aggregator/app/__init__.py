@@ -39,8 +39,8 @@ def create_app(config_object=None):
 
     server_ip = app.config.get("SERVER_IP")
 
-    # Setup PySeal
-    cipher_save_path = os.path.join(app.instance_path + CIPHERTEXT_SAVE_FILE)
+    # Setup Library
+    cipher_save_path = os.path.join(app.instance_path)
     he_lib = HomomorphicEncryptionEW(cipher_save_path)
 
     logging.info("HE library for Aggregator set up successfully!")
@@ -65,6 +65,7 @@ def create_app(config_object=None):
     def save_weights():
         content = request.json
         weights = content['weights']
+        he_lib.metadata = content['metadata']
         he_lib.save_encrypted_weight(weights)
         return jsonify({
             'success': True,
@@ -74,19 +75,13 @@ def create_app(config_object=None):
 
     @app.route('/agg_val')
     def agg_val():
-        weight, num_party = he_lib.aggregate_encrypted_weights()
-        if not weight:
+        res = he_lib.aggregate_encrypted_weights()
+        if not res['weights']:
             return jsonify({
                 'success': True,
                 'error_code': SERVER_OK,
                 'error_message': SERVER_OK_MESSAGE,
-                'result': weight,
             })
-
-        res = {
-            "weights": weight,
-            "num_party": num_party
-        }
         response = requests.post(server_ip + UPDATE_MODEL_ENDPOINT, json=res)
 
         res["update_status_code"] = response.status_code
@@ -94,7 +89,7 @@ def create_app(config_object=None):
             'success': True,
             'error_code': SERVER_OK,
             'error_message': SERVER_OK_MESSAGE,
-            # 'result': res,
+            'result': res['metadata'],
         })
 
     return app
