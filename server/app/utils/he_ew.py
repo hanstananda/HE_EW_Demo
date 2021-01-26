@@ -1,3 +1,4 @@
+import base64
 import logging
 import os
 import subprocess
@@ -14,7 +15,8 @@ class HomomorphicEncryptionEW:
     supported_max_int = 60000
     EPS = 1e-3
 
-    def __init__(self, private_key):
+    def __init__(self, private_key, cipher_save_path):
+        self._cipher_save_path = cipher_save_path
         self._private_key = private_key
 
     @classmethod
@@ -44,13 +46,18 @@ class HomomorphicEncryptionEW:
 
         return result
 
-    def decrypt_layer_weights(self, layer_weights, num_party):
+    def decrypt_layer_weights(self, metadata, layer_weights, num_party):
         decoded_weights = []
         start_time = time.clock()
         inp_str = f"1 {self._private_key}\n"
-        inp_str += layer_weights
-        executable_path = Path(APP_ROOT).parent.parent.joinpath(LIBRARY_EXECUTABLE)
-        process = subprocess.run([str(executable_path.absolute()), "decrypt"],
+        inp_str += metadata
+
+        file_path = Path(self._cipher_save_path)
+        with open(file_path, "wb+") as f:
+            f.write(base64.b64decode(layer_weights))
+
+        executable_path = Path(APP_ROOT).parent.joinpath(LIBRARY_EXECUTABLE)
+        process = subprocess.run([str(executable_path.absolute()), "decrypt", file_path.absolute()],
                                  input=inp_str.encode('utf-8'),
                                  stdout=subprocess.PIPE)
         process_outputs = process.stdout.decode('utf-8').split("\n")
