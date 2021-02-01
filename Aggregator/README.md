@@ -2,7 +2,7 @@
 
 ## Prerequisites
 1. Python 3 (Tested on Python 3.7)
-2. PySEAL library
+2. HE Element-Wise C++ Library
 
 ## Running the project
 
@@ -10,8 +10,16 @@
     ```bash
     pip install -r requirements.txt
     ```
+    
+2.  Install the "HE Element-Wise C++" Library 
+    ```bash
+    cd library
+    cmake --configure .
+    cmake --build .
+    ```
+    For more details, please refer to the [library readme](https://github.com/hanstananda/HE_EW_CPP/blob/master/README.md)
 
-2.  Run the python script
+3.  Run the python script
     ```
     python run_server.py
     ```
