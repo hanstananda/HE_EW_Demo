@@ -57,6 +57,9 @@ class HomomorphicEncryptionEW:
         logging.info(f"Time taken for encrypted aggregation is {time_elapsed} s")
 
         # Reset encrypted weights
+        for i in self._encrypted_weights:
+            file = Path(i)
+            file.unlink()
         self._encrypted_weights = []
 
         with open(result_file, "rb") as f:
