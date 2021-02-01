@@ -1,4 +1,4 @@
-# PySEAL Aggregation Demo server
+# HE Element-Wise Demo server
 
 ## Prerequisites
 1. Python 3 (Tested on Python 3.7)

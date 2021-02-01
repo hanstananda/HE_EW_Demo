@@ -41,18 +41,20 @@ def create_app(test_config=None, private_key=None):
     if private_key is None:
         executable_path = Path(APP_ROOT).parent.parent.joinpath(LIBRARY_EXECUTABLE)
         logging.debug(executable_path.absolute())
-        ip = "0\n1\n1 1\n".encode('utf-8')
-        process = subprocess.run([str(executable_path.absolute()), "encrypt"],
-                                 input=ip,
+        inp = "0\n1\n1 1\n".encode('utf-8')
+        process = subprocess.run([str(executable_path.absolute()), "encrypt", "cipher.bin"],
+                                 input=inp,
                                  stdout=subprocess.PIPE)
         process_outputs = process.stdout.decode('utf-8').split()
         # logging.warning(process_outputs)
         private_key = process_outputs[1]
         logging.info("Private key created successfully!")
-        # logging.debug(f"Private key is {private_key}")
-        he_lib = HomomorphicEncryptionEW(
-            private_key=private_key,
-        )
+    # logging.debug(f"Private key is {private_key}")
+    cipher_save_path = os.path.join(app.instance_path, CIPHERTEXT_SAVE_FILE)
+    he_lib = HomomorphicEncryptionEW(
+        private_key=private_key,
+        cipher_save_path=cipher_save_path,
+    )
 
     # Setup model
     import tensorflow as tf
@@ -128,8 +130,9 @@ def create_app(test_config=None, private_key=None):
         content = request.json
         weights = content['weights']
         num_party = content['num_party']
+        metadata = content['metadata']
         logging.info("Num workers involved = {}".format(num_party))
-        update_weights = he_lib.decrypt_layer_weights(weights, num_party)
+        update_weights = he_lib.decrypt_layer_weights(metadata, weights, num_party)
 
         for idx, weight in enumerate(model.get_weights()):
             shape = weight.shape

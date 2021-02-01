@@ -1,4 +1,4 @@
-# PySEAL Aggregator service
+# HE Element-Wise Aggregator service
 
 ## Prerequisites
 1. Python 3 (Tested on Python 3.7)

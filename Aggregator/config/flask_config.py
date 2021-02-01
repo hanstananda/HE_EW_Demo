@@ -7,7 +7,7 @@ AGGREGATOR_IP = "0.0.0.0"
 PARAMS_FILE_ENDPOINT = "/get_saved_params"
 PARAMS_JSON_ENDPOINT = "/get_params"
 PARAMS_SAVE_FILE = "params.txt"
-CIPHERTEXT_SAVE_FILE = "cipher.txt"
+CIPHERTEXT_SAVE_FILE = "cipher.bin"
 UPDATE_MODEL_ENDPOINT = "/update_model_weights_enc"
 LIBRARY_EXECUTABLE = "library/app_HE"
 

@@ -1,4 +1,4 @@
-# PySEAL Workers service
+# HE Element-Wise Workers service
 
 ## Prerequisites
 1. Python 3 (Tested on Python 3.7)
