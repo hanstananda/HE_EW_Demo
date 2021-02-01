@@ -72,7 +72,7 @@ class HomomorphicEncryptionEW:
         key_end_idx = process_outputs.find("\n")
 
         with open(self._cipher_save_path, "rb") as f:
-            encoded_string = base64.b64encode(f.read())
+            encoded_string = base64.b64encode(f.read()).decode('utf-8')
 
         time_elapsed = time.clock() - start_time
         logging.info(f"Time taken for encryption and encoding is {time_elapsed} s")
