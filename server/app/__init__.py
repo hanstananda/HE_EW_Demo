@@ -37,7 +37,7 @@ def create_app(test_config=None):
         pass
 
     # Setup HE library
-    executable_path = Path(APP_ROOT).parent.parent.joinpath(LIBRARY_EXECUTABLE)
+    executable_path = Path(APP_ROOT).parent.joinpath(LIBRARY_EXECUTABLE)
     logging.debug(executable_path.absolute())
     public_save_path = Path(app.instance_path).joinpath(PUBLIC_KEY_SAVE_FILE)
     secret_save_path = Path(app.instance_path).joinpath(SECRET_KEY_SAVE_FILE)
@@ -51,14 +51,15 @@ def create_app(test_config=None):
         ],
         input=inp,
         stdout=subprocess.PIPE)
-    # logging.warning(process_outputs)
-    logging.info("Private key created successfully!")
-    # logging.debug(f"Private key is {private_key}")
+    process_outputs = process.stdout.decode('utf-8')
+    logging.info(process_outputs)
+
     cipher_save_path = os.path.join(app.instance_path, CIPHERTEXT_SAVE_FILE)
     he_lib = HomomorphicEncryptionEW(
         private_key_save_path=secret_save_path,
         cipher_save_path=cipher_save_path,
     )
+    logging.info("HE library setup successful!")
 
     # Setup model
     import tensorflow as tf

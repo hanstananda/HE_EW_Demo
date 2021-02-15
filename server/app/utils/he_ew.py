@@ -63,7 +63,7 @@ class HomomorphicEncryptionEW:
                                  stdout=subprocess.PIPE)
         process_outputs = process.stdout.decode('utf-8').split("\n")
 
-        for idx in range(2, len(process_outputs)):
+        for idx in range(len(process_outputs)):
             encoded_weights = process_outputs[idx].split()[1:]
             decoded = [self.decode_value(int(i), num_party=num_party) for i in encoded_weights]
             if decoded:  # Check nonempty
