@@ -76,7 +76,9 @@ def create_app(config_object=None):
     @app.route('/agg_val')
     def agg_val():
         res = he_lib.aggregate_encrypted_weights()
-        if not res['weights']:
+        logging.info(f"Aggregated {res['num_party']} result(s)")
+
+        if res['num_party'] == 0:
             return jsonify({
                 'success': True,
                 'error_code': SERVER_OK,
