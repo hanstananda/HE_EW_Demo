@@ -10,13 +10,12 @@ from flask import Flask, jsonify, send_file, request
 from app.constant.http.error import SERVER_OK, SERVER_OK_MESSAGE
 from app.utils.he_ew import HomomorphicEncryptionEW
 
-from config.flask_config import PARAMS_SAVE_FILE, MODEL_SAVE_FILE, CIPHERTEXT_SAVE_FILE, LIBRARY_EXECUTABLE, basedir, \
-    APP_ROOT
+from config.flask_config import *
 from model import create_model, num_classes
 from tensorflow import keras
 
 
-def create_app(test_config=None, private_key=None):
+def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
@@ -38,21 +37,26 @@ def create_app(test_config=None, private_key=None):
         pass
 
     # Setup HE library
-    if private_key is None:
-        executable_path = Path(APP_ROOT).parent.parent.joinpath(LIBRARY_EXECUTABLE)
-        logging.debug(executable_path.absolute())
-        inp = "0\n1\n1 1\n".encode('utf-8')
-        process = subprocess.run([str(executable_path.absolute()), "encrypt", "cipher.bin"],
-                                 input=inp,
-                                 stdout=subprocess.PIPE)
-        process_outputs = process.stdout.decode('utf-8').split()
-        # logging.warning(process_outputs)
-        private_key = process_outputs[1]
-        logging.info("Private key created successfully!")
+    executable_path = Path(APP_ROOT).parent.parent.joinpath(LIBRARY_EXECUTABLE)
+    logging.debug(executable_path.absolute())
+    public_save_path = Path(app.instance_path).joinpath(PUBLIC_KEY_SAVE_FILE)
+    secret_save_path = Path(app.instance_path).joinpath(SECRET_KEY_SAVE_FILE)
+    inp = "0\n1\n1 1\n".encode('utf-8')
+    process = subprocess.run(
+        [
+            str(executable_path.absolute()),
+            "keygen",
+            public_save_path.absolute(),
+            secret_save_path.absolute()
+        ],
+        input=inp,
+        stdout=subprocess.PIPE)
+    # logging.warning(process_outputs)
+    logging.info("Private key created successfully!")
     # logging.debug(f"Private key is {private_key}")
     cipher_save_path = os.path.join(app.instance_path, CIPHERTEXT_SAVE_FILE)
     he_lib = HomomorphicEncryptionEW(
-        private_key=private_key,
+        private_key_save_path=secret_save_path,
         cipher_save_path=cipher_save_path,
     )
 
@@ -93,15 +97,7 @@ def create_app(test_config=None, private_key=None):
 
     @app.route('/get_key')
     def get_saved_params():
-        res = {
-            "key": private_key
-        }
-        return jsonify({
-            'success': True,
-            'error_code': SERVER_OK,
-            'error_message': SERVER_OK_MESSAGE,
-            'result': res
-        })
+        return send_file(public_save_path)
 
     @app.route('/get_model')
     def get_model():
@@ -138,7 +134,7 @@ def create_app(test_config=None, private_key=None):
             shape = weight.shape
             new_weight = update_weights[idx]
             logging.debug(f"Original decrypted layer weight {idx} = {min(new_weight)} " +
-                            f"{max(new_weight)} {len(new_weight)}")
+                          f"{max(new_weight)} {len(new_weight)}")
             new_weight = numpy.resize(new_weight, shape)
             update_weights[idx] = new_weight
 

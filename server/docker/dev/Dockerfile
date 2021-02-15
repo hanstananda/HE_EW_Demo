@@ -29,6 +29,10 @@ RUN mkdir -p $PROJECT_DIR
 COPY requirements.txt ./
 RUN pip install -r requirements.txt
 
+# Install library
+COPY library ./library
+RUN cd library && cmake --build . --target clean
+
 WORKDIR $PROJECT_DIR
 
 # Server
