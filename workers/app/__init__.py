@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import time
+from pathlib import Path
 
 import numpy
 import requests
@@ -20,7 +21,7 @@ from config.flask_config import PARAMS_JSON_ENDPOINT, SERVER_GET_KEY_ENDPOINT, D
     CIPHERTEXT_SAVE_FILE
 
 
-def create_app(config_object=None, worker_id=1, private_key=None):
+def create_app(config_object=None, worker_id=1):
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
@@ -45,14 +46,16 @@ def create_app(config_object=None, worker_id=1, private_key=None):
     server_ip = app.config.get("SERVER_IP")
 
     # Setup HE library
-    cipher_save_path = os.path.join(app.instance_path, CIPHERTEXT_SAVE_FILE)
+    cipher_save_path = Path(app.instance_path).joinpath(CIPHERTEXT_SAVE_FILE)
+    public_save_path = Path(app.instance_path).joinpath(PUBLIC_KEY_SAVE_FILE)
     logging.info("Setting up HE library for Worker {}!".format(worker_id))
-    if private_key is None:
-        json_key = requests.get(server_ip + SERVER_GET_KEY_ENDPOINT).json()
-        private_key = json_key['result']['key']
+    private_key_file = requests.get(server_ip + SERVER_GET_KEY_ENDPOINT).content
+    with open(public_save_path, 'wb+') as f:
+        f.write(private_key_file)
+
     # logging.debug(f"Private key of {private_key} is used!")
     he_lib = HomomorphicEncryptionEW(
-        private_key=private_key,
+        public_save_path=public_save_path,
         cipher_save_path=cipher_save_path
     )
 

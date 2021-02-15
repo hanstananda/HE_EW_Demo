@@ -1,5 +1,5 @@
 # pull official base image
-FROM seal-python:latest
+FROM python:3.7
 
 # set environment variables and arguments
 ENV PYTHONDONTWRITEBYTECODE 1
