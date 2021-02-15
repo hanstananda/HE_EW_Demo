@@ -4,7 +4,7 @@ FROM python:3.7
 # set environment variables and arguments
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
-ARG PROJECT=pyseal-demo-workers
+ARG PROJECT=he-ew-demo-workers
 ARG PROJECT_DIR=/var/www/${PROJECT}
 #ARG BASE_PROJECT_DIR=server
 

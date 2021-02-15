@@ -1,16 +1,16 @@
 version: '3.8'
 services:
-  pyseal-demo-server:
-    container_name: pyseal_demo_server
+  he-ew-demo-server:
+    container_name: he_ew_demo_server
     restart: always
     build:
       context: ./server
       dockerfile: docker/dev/Dockerfile
-    image: pyseal_demo_server
+    image: he_ew_demo_server
     stdin_open: true
     tty: true
     volumes:
-      - ./server:/var/www/pyseal-demo-server
+      - ./server:/var/www/he-ew-demo-server
     ports:
       - "7000:7000"
     networks:
@@ -20,10 +20,10 @@ services:
       interval: 15s
       timeout: 10s
       retries: 5
-  pyseal-demo-workers:
-    container_name: pyseal_demo_workers
+  he-ew-demo-workers:
+    container_name: he_ew_demo_workers
     depends_on:
-      - pyseal-demo-server
+      - he-ew-demo-server
 #        condition: service_healthy
 #      pyseal-demo-aggregator-service:
 #          condition: service_healthy
@@ -31,30 +31,30 @@ services:
     build:
       context: ./workers
       dockerfile: docker/dev/Dockerfile
-    image: pyseal_demo_workers
+    image: he_ew_demo_workers
     stdin_open: true
     tty: true
     volumes:
-      - ./workers:/var/www/pyseal-demo-workers
+      - ./workers:/var/www/he-ew-demo-workers
     ports:
       - "7101:7101"
       - "7102:7102"
     networks:
       - isolation-network
-  pyseal-demo-aggregator-service:
-    container_name: pyseal_demo_aggregator_service
+  he-ew-demo-aggregator-service:
+    container_name: he_ew_demo_aggregator_service
     depends_on:
-      - pyseal-demo-server
+      - he-ew-demo-server
 #        condition: service_healthy
     restart: always
     build:
       context: ./Aggregator
       dockerfile: docker/dev/Dockerfile
-    image: pyseal_demo_aggregator_service
+    image: he_ew_demo_aggregator_service
     stdin_open: true
     tty: true
     volumes:
-      - ./Aggregator:/var/www/pyseal-demo-aggregator-service
+      - ./Aggregator:/var/www/he-ew-demo-aggregator-service
     ports:
       - "7200:7200"
     networks:

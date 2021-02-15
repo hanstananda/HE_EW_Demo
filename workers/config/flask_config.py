@@ -24,5 +24,5 @@ class DefaultConfig:
 
 
 class DockerConfig(DefaultConfig):
-    SERVER_IP = "http://pyseal-demo-server:7000"
-    AGGREGATOR_IP = "http://pyseal-demo-aggregator-service:7200"
+    SERVER_IP = "http://he-ew-demo-server:7000"
+    AGGREGATOR_IP = "http://he-ew-demo-aggregator-service:7200"

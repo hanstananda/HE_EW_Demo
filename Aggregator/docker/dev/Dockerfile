@@ -4,7 +4,7 @@ FROM seal-python:latest
 # set environment variables and arguments
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
-ARG PROJECT=pyseal-demo-aggregator-service
+ARG PROJECT=he-ew-demo-aggregator-service
 ARG PROJECT_DIR=/var/www/${PROJECT}
 #ARG BASE_PROJECT_DIR=server
 

@@ -4,7 +4,7 @@ FROM seal-python:latest
 # set environment variables and arguments
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
-ARG PROJECT=pyseal-demo-server
+ARG PROJECT=he-ew-demo-server
 ARG PROJECT_DIR=/var/www/${PROJECT}
 #ARG BASE_PROJECT_DIR=server
 
@@ -31,7 +31,7 @@ RUN pip install -r requirements.txt
 
 # Install library
 COPY library ./library
-RUN cd library && cmake --build . --target clean
+#RUN cd library && cmake --build . --target clean
 
 WORKDIR $PROJECT_DIR
 

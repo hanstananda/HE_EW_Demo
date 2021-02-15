@@ -18,4 +18,4 @@ class DefaultConfig:
 
 
 class DockerConfig(DefaultConfig):
-    SERVER_IP = "http://pyseal-demo-server:7000"
+    SERVER_IP = "http://he-ew-demo-server:7000"
