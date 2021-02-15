@@ -14,8 +14,8 @@ class HomomorphicEncryptionEW:
     max_range = 10.0
     supported_max_int = 60000
 
-    def __init__(self, private_key, cipher_save_path):
-        self._private_key = private_key
+    def __init__(self, public_save_path, cipher_save_path):
+        self._public_save_path = public_save_path
         self._cipher_save_path = cipher_save_path
 
     @classmethod
@@ -53,8 +53,8 @@ class HomomorphicEncryptionEW:
             weights.append(reshaped_layer_weight)
 
         # Format input to be given to the library
-        inp_str = f"1 {self._private_key}\n"
-        inp_str += f"{len(weights)}\n"
+        # inp_str = f"1 {self._public_save_path}\n"
+        inp_str = f"{len(weights)}\n"
         for layer in weights:
             inp_str += f"{len(layer)} "
             for val in layer:
@@ -63,13 +63,18 @@ class HomomorphicEncryptionEW:
             inp_str += "\n"
 
         executable_path = Path(APP_ROOT).parent.joinpath(LIBRARY_EXECUTABLE)
-        process = subprocess.run([str(executable_path.absolute()), "encrypt", Path(self._cipher_save_path).absolute()],
-                                 input=inp_str.encode('utf-8'),
-                                 stdout=subprocess.PIPE)
+        process = subprocess.run(
+            [
+                str(executable_path.absolute()),
+                "encrypt",
+                self._cipher_save_path.absolute(),
+                self._public_save_path.absolute()
+            ],
+            input=inp_str.encode('utf-8'),
+            stdout=subprocess.PIPE
+        )
 
         process_outputs = process.stdout.decode('utf-8')
-        # Remove the key from the output
-        key_end_idx = process_outputs.find("\n")
 
         with open(self._cipher_save_path, "rb") as f:
             encoded_string = base64.b64encode(f.read()).decode('utf-8')
@@ -78,6 +83,6 @@ class HomomorphicEncryptionEW:
         logging.info(f"Time taken for encryption and encoding is {time_elapsed} s")
 
         return {
-            "metadata": process_outputs[key_end_idx:],
+            "metadata": process_outputs,
             "weights": encoded_string
         }

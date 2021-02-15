@@ -15,9 +15,9 @@ class HomomorphicEncryptionEW:
     supported_max_int = 60000
     EPS = 1e-3
 
-    def __init__(self, private_key, cipher_save_path):
+    def __init__(self, private_key_save_path, cipher_save_path):
         self._cipher_save_path = cipher_save_path
-        self._private_key = private_key
+        self._private_key_save_path = private_key_save_path
 
     @classmethod
     def get_param_info(cls):
@@ -49,20 +49,21 @@ class HomomorphicEncryptionEW:
     def decrypt_layer_weights(self, metadata, layer_weights, num_party):
         decoded_weights = []
         start_time = time.clock()
-        inp_str = f"1 {self._private_key}\n"
-        inp_str += metadata
+        inp_str = metadata
 
         file_path = Path(self._cipher_save_path)
+        secret_path = Path(self._private_key_save_path)
+
         with open(file_path, "wb+") as f:
             f.write(base64.b64decode(layer_weights))
 
         executable_path = Path(APP_ROOT).parent.joinpath(LIBRARY_EXECUTABLE)
-        process = subprocess.run([str(executable_path.absolute()), "decrypt", file_path.absolute()],
+        process = subprocess.run([str(executable_path.absolute()), "decrypt", file_path.absolute(), secret_path.absolute()],
                                  input=inp_str.encode('utf-8'),
                                  stdout=subprocess.PIPE)
         process_outputs = process.stdout.decode('utf-8').split("\n")
 
-        for idx in range(2, len(process_outputs)):
+        for idx in range(len(process_outputs)):
             encoded_weights = process_outputs[idx].split()[1:]
             decoded = [self.decode_value(int(i), num_party=num_party) for i in encoded_weights]
             if decoded:  # Check nonempty

@@ -35,8 +35,7 @@ class HomomorphicEncryptionEW:
 
     def aggregate_encrypted_weights(self):
         start_time = time.clock()
-        inp_str = "0\n"
-        inp_str += self.metadata
+        inp_str = self.metadata
         num_party = len(self._encrypted_weights)
         if num_party == 0:
             return {
@@ -46,12 +45,17 @@ class HomomorphicEncryptionEW:
             }
         executable_path = Path(APP_ROOT).parent.joinpath(LIBRARY_EXECUTABLE)
         result_file = Path(self._cipher_save_path).joinpath(CIPHERTEXT_SAVE_FILE)
-        process = subprocess.run([str(executable_path.absolute()), "add", result_file.absolute(), str(num_party), *self._encrypted_weights],
-                                 input=inp_str.encode('utf-8'),
-                                 stdout=subprocess.PIPE)
+        process = subprocess.run(
+            [
+                str(executable_path.absolute()),
+                "add",
+                result_file.absolute(),
+                str(num_party),
+                *self._encrypted_weights
+            ],
+            input=inp_str.encode('utf-8'),
+            stdout=subprocess.PIPE)
         process_outputs = process.stdout.decode('utf-8')
-        # Remove the key params from the output
-        key_end_idx = process_outputs.find("\n")
 
         time_elapsed = time.clock() - start_time
         logging.info(f"Time taken for encrypted aggregation is {time_elapsed} s")
@@ -66,9 +70,7 @@ class HomomorphicEncryptionEW:
             encoded_string = base64.b64encode(f.read()).decode('utf-8')
 
         return {
-            "metadata": process_outputs[key_end_idx:],
+            "metadata": process_outputs,
             "weights": encoded_string,
             "num_party": num_party
         }
-
-
