@@ -31,6 +31,8 @@ RUN pip install -r requirements.txt
 
 # Install library
 COPY library ./library
+#RUN rm -rf ./library/CMakeFiles
+#RUN cmake ./library --cmake-force-configure --cmake-clean-first
 #RUN cd library && cmake --build . --target clean
 
 WORKDIR $PROJECT_DIR

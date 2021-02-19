@@ -48,7 +48,6 @@ class HomomorphicEncryptionEW:
 
     def decrypt_layer_weights(self, metadata, layer_weights, num_party):
         decoded_weights = []
-        start_time = time.clock()
         inp_str = metadata
 
         file_path = Path(self._cipher_save_path)
@@ -69,8 +68,5 @@ class HomomorphicEncryptionEW:
             if decoded:  # Check nonempty
                 decoded_weights.append(decoded)
                 # logging.warning(decoded[:10])
-
-        time_elapsed = time.clock() - start_time
-        logging.info(f"Time taken for decryption and decoding is {time_elapsed} s")
 
         return decoded_weights

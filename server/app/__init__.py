@@ -1,6 +1,7 @@
 import logging
 import os
 import subprocess
+import time
 from pathlib import Path
 
 import numpy
@@ -129,7 +130,10 @@ def create_app(test_config=None):
         num_party = content['num_party']
         metadata = content['metadata']
         logging.info("Num workers involved = {}".format(num_party))
+        start_time = time.perf_counter()
         update_weights = he_lib.decrypt_layer_weights(metadata, weights, num_party)
+        time_elapsed = time.perf_counter() - start_time
+        logging.info(f"Time taken for decryption and decoding is {time_elapsed} s")
 
         for idx, weight in enumerate(model.get_weights()):
             shape = weight.shape
@@ -140,11 +144,14 @@ def create_app(test_config=None):
             update_weights[idx] = new_weight
 
         model.set_weights(update_weights)
-        evaluate_model()
+        # evaluate_model()
         return jsonify({
             'success': True,
             'error_code': SERVER_OK,
             'error_message': SERVER_OK_MESSAGE,
+            'result': {
+                'decryption_time': time_elapsed,
+            }
         })
 
     @app.route('/evaluate_model')
