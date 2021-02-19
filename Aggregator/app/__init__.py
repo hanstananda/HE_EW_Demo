@@ -75,23 +75,31 @@ def create_app(config_object=None):
 
     @app.route('/agg_val')
     def agg_val():
-        res = he_lib.aggregate_encrypted_weights()
-        logging.info(f"Aggregated {res['num_party']} result(s)")
+        aggregate_res = he_lib.aggregate_encrypted_weights()
+        logging.info(f"Aggregated {aggregate_res['num_party']} result(s)")
 
-        if res['num_party'] == 0:
+        if aggregate_res['num_party'] == 0:
             return jsonify({
                 'success': True,
                 'error_code': SERVER_OK,
                 'error_message': SERVER_OK_MESSAGE,
+                'result': {},
             })
-        response = requests.post(server_ip + UPDATE_MODEL_ENDPOINT, json=res)
+        response = requests.post(server_ip + UPDATE_MODEL_ENDPOINT, json=aggregate_res)
 
-        res["update_status_code"] = response.status_code
+        result_payload = {
+            'server_update_status_code': response.status_code,
+            'num_party_aggregated': aggregate_res['num_party'],
+            'aggregation_time': aggregate_res['aggregation_time'],
+        }
+        if response.status_code == 200:
+            result_payload['decryption_time'] = response.json()['result']['decryption_time']
+
         return jsonify({
             'success': True,
             'error_code': SERVER_OK,
             'error_message': SERVER_OK_MESSAGE,
-            'result': res['metadata'],
+            'result': result_payload,
         })
 
     return app

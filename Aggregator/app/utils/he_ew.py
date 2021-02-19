@@ -34,14 +34,16 @@ class HomomorphicEncryptionEW:
         self._encrypted_weights.append(file_path.absolute())
 
     def aggregate_encrypted_weights(self):
-        start_time = time.clock()
+        start_time = time.perf_counter()
         inp_str = self.metadata
         num_party = len(self._encrypted_weights)
         if num_party == 0:
+            time_elapsed = time.perf_counter() - start_time
             return {
                 "metadata": self.metadata,
                 "weights": None,
-                "num_party": num_party
+                "num_party": num_party,
+                "aggregation_time": time_elapsed.__str__(),
             }
         executable_path = Path(APP_ROOT).parent.joinpath(LIBRARY_EXECUTABLE)
         result_file = Path(self._cipher_save_path).joinpath(CIPHERTEXT_SAVE_FILE)
@@ -57,7 +59,7 @@ class HomomorphicEncryptionEW:
             stdout=subprocess.PIPE)
         process_outputs = process.stdout.decode('utf-8')
 
-        time_elapsed = time.clock() - start_time
+        time_elapsed = time.perf_counter() - start_time
         logging.info(f"Time taken for encrypted aggregation is {time_elapsed} s")
 
         # Reset encrypted weights
@@ -72,5 +74,6 @@ class HomomorphicEncryptionEW:
         return {
             "metadata": process_outputs,
             "weights": encoded_string,
-            "num_party": num_party
+            "num_party": num_party,
+            "aggregation_time": time_elapsed,
         }
