@@ -107,14 +107,18 @@ def create_app(config_object=None, worker_id=1):
         reload_weight()
         x_train, y_train = dataset.get_train_data_partitions(worker_id)
         model_nn.train(x_train, y_train)
-        request = he_lib.encrypt_layer_weights(model_nn.get_weights())
-        # for i in request["weights"]:
+        request_data = he_lib.encrypt_layer_weights(model_nn.get_weights())
+        # for i in request_data["weights"]:
         #     logging.info("Data type is {}".format(type(i)))
-        requests.post(aggregator_ip + SAVE_WEIGHT_MATRIX_ENDPOINT, json=request)
+        requests.post(aggregator_ip + SAVE_WEIGHT_MATRIX_ENDPOINT, json=request_data)
+        result = {}
+        if 'encryption_time' in request_data:
+            result['encryption_time'] = request_data['encryption_time']
         return jsonify({
             'success': True,
             'error_code': SERVER_OK,
-            'error_message': SERVER_OK_MESSAGE
+            'error_message': SERVER_OK_MESSAGE,
+            'result': result
         })
 
     return app

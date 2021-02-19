@@ -39,7 +39,7 @@ class HomomorphicEncryptionEW:
 
     def encrypt_layer_weights(self, layer_weights):
         weights = []
-        start_time = time.clock()
+        start_time = time.perf_counter()
 
         for idx, layer_weight in enumerate(layer_weights):
             logging.debug("layer weight {} = {}".format(idx, layer_weight))
@@ -79,10 +79,11 @@ class HomomorphicEncryptionEW:
         with open(self._cipher_save_path, "rb") as f:
             encoded_string = base64.b64encode(f.read()).decode('utf-8')
 
-        time_elapsed = time.clock() - start_time
+        time_elapsed = time.perf_counter() - start_time
         logging.info(f"Time taken for encryption and encoding is {time_elapsed} s")
 
         return {
             "metadata": process_outputs,
-            "weights": encoded_string
+            "weights": encoded_string,
+            "encryption_time": time_elapsed,
         }
